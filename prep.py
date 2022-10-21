@@ -11,16 +11,21 @@ import os
 import re
 import getopt
 import urllib.request
+from Bio.PDB.PDBIO import Select
+from Bio.PDB import PDBIO
+from Bio.PDB import PDBParser
 
 HOME_DIR = os.getcwd()
 PDB_DIR = os.path.join(HOME_DIR, "PDB")
 RESULTS_DIR = os.path.join(HOME_DIR, "results")
 DETAILS_DIR = os.path.join(HOME_DIR, "details")
 TMP_DIR = os.path.join(HOME_DIR, "tmp")
+ILIGS = os.path.join(HOME_DIR, "iligs")
 RCSB_URL = "https://files.rcsb.org/view/"
 
 num_ipro = 0
 num_ilig = 0
+
 
 def ata(nm, aa,ele):
     at = ' '
@@ -139,7 +144,6 @@ def ata(nm, aa,ele):
         #input('weird atom type')
 
     return at
-
 
 
 def process_pdb(PDB_path, IPRO_path, ILIG_path):
@@ -273,6 +277,7 @@ def process_pdb(PDB_path, IPRO_path, ILIG_path):
 
     iligfile.close()
 
+
 def make_dirs():
     if not os.path.exists(HOME_DIR):
         os.mkdir(HOME_DIR)
@@ -284,6 +289,9 @@ def make_dirs():
         os.mkdir(RESULTS_DIR)
     if not os.path.exists(DETAILS_DIR):
         os.mkdir(DETAILS_DIR)
+    if not os.path.exists(ILIGS):
+        os.mkdir(ILIGS)
+    
 
 def download_pdb(pdb_id):
     file_name = pdb_id.upper()+'.pdb' #.upper: make string upper cases
@@ -296,10 +304,12 @@ def download_pdb(pdb_id):
         print('Error: Could not download',file_name, file=sys.stderr)
         return False
 
+
 def print_usage():
     print('Usage:')
     print('\tlise -i <PDBid>')
     print('\tlise -f <PDBfilepath>')
+
 
 def main(argv):
     
@@ -341,10 +351,25 @@ def main(argv):
             print("RESULTS_PATH:", RESULTS_path)
             print("DETAILS_PATH:", DETAILS_path)
 
-            if (not(os.path.exists(RESULTS_path) and os.path.exists(DETAILS_path))):
+            if (os.path.exists(RESULTS_path) or os.path.exists(DETAILS_path)) is False:
 
                 IPRO_path = os.path.join(TMP_DIR, PDB_id + "_ipro.txt")
                 ILIG_path = os.path.join(TMP_DIR, PDB_id + "_ilig.txt")
+                ILIG_pdb = os.path.join(ILIGS, PDB_id + "_temp.pdb")
+                
+                class IlligSelect(Select):
+                    def accept_residue(self, residue):
+                        if residue.id[0] != "W":
+                            if residue.id[0] != " ":
+                                return 1
+                            else:
+                                return 0
+
+                parser = PDBParser()
+                structure = parser.get_structure(PDB_id, PDB_path)
+                io = PDBIO()
+                io.set_structure(structure)
+                io.save(ILIG_pdb, IlligSelect())
 
                 print("IPRO_PATH:", IPRO_path)
                 print("ILIG_PATH:", ILIG_path)
@@ -360,4 +385,6 @@ def main(argv):
             print_usage()
             sys.exit(1)
 
-main(sys.argv[1:])
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
