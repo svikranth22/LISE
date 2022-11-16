@@ -242,13 +242,13 @@ int main(int argc, char *argv[]) {
 	ipro_fptr = fopen(p, "r");
 
 	checkinput(fscanf(stdin, "ILIG_PATH: %s\n", p));
-	ilig_fptr = fopen(p, "r");
+    ilig_fptr = fopen(p, "r");
 
 	checkinput(fscanf(stdin, "IPRO_ATOMS: %d\n", &n));
-	createipro(n, &ipro);
+    createipro(n, &ipro);
 
 	checkinput(fscanf(stdin, "ILIG_ATOMS: %d\n", &n));
-	createilig(n, &ilig);
+    createilig(n, &ilig);
 
 	setipro(ipro_fptr, &ipro);
 	setilig(ilig_fptr, &ilig);
@@ -256,7 +256,7 @@ int main(int argc, char *argv[]) {
 	fclose(ipro_fptr);
 	fclose(ilig_fptr);
 
-	fprintf(stdout, "Protiens set.\n");
+	fprintf(stdout, "Proteins set.\n");
 
 	IPRO_STATS ipro_st;
 	GRID grid;

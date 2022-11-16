@@ -14,7 +14,9 @@ import urllib.request
 from Bio.PDB.PDBIO import Select
 from Bio.PDB import PDBIO
 from Bio.PDB import PDBParser
+import warnings
 
+warnings.filterwarnings("ignore")
 HOME_DIR = os.getcwd()
 PDB_DIR = os.path.join(HOME_DIR, "PDB")
 RESULTS_DIR = os.path.join(HOME_DIR, "results")
@@ -314,7 +316,7 @@ def print_usage():
 def main(argv):
     
     if len(argv) == 0:
-        print('Error: No sepcified agruments', file = sys.stderr)
+        print('Error: No specified arguments', file = sys.stderr)
         print_usage()
         sys.exit(2)
      
@@ -327,7 +329,7 @@ def main(argv):
     
     make_dirs()
     
-    for opt,arg in opts:
+    for opt, arg in opts:
         if opt in ("-h", "--help"):
             print_usage()
             sys.exit(1)
@@ -341,8 +343,9 @@ def main(argv):
             PDB_path = os.path.join(PDB_DIR, PDB_id + ".pdb")
 
             if not os.path.exists(PDB_path):
-                print("Fetching...")
+                # print("Fetching...")
                 if not download_pdb(PDB_id):
+                    print("exited")
                     sys.exit(2)
 
             RESULTS_path = os.path.join(RESULTS_DIR, PDB_id + "_top10.pdb")
@@ -356,7 +359,15 @@ def main(argv):
                 IPRO_path = os.path.join(TMP_DIR, PDB_id + "_ipro.txt")
                 ILIG_path = os.path.join(TMP_DIR, PDB_id + "_ilig.txt")
                 ILIG_pdb = os.path.join(ILIGS, PDB_id + "_temp.pdb")
-                
+
+                print("IPRO_PATH:", IPRO_path)
+                print("ILIG_PATH:", ILIG_path)
+
+                process_pdb(PDB_path, IPRO_path, ILIG_path)
+
+                print("IPRO_ATOMS:", num_ipro)
+                print ("ILIG_ATOMS:", num_ilig)
+
                 class IlligSelect(Select):
                     def accept_residue(self, residue):
                         if residue.id[0] != "W":
@@ -370,14 +381,6 @@ def main(argv):
                 io = PDBIO()
                 io.set_structure(structure)
                 io.save(ILIG_pdb, IlligSelect())
-
-                print("IPRO_PATH:", IPRO_path)
-                print("ILIG_PATH:", ILIG_path)
-
-                process_pdb(PDB_path, IPRO_path, ILIG_path)
-
-                print("IPRO_ATOMS:", num_ipro)
-                print ("ILIG_ATOMS:", num_ilig)
 
             sys.exit(1)
 
