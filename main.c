@@ -248,10 +248,12 @@ int main(int argc, char *argv[]) {
     createipro(n, &ipro);
 
 	checkinput(fscanf(stdin, "ILIG_ATOMS: %d\n", &n));
-    createilig(n, &ilig);
+	if (n != 0)
+    		createilig(n, &ilig);
 
 	setipro(ipro_fptr, &ipro);
-	setilig(ilig_fptr, &ilig);
+	if (illig != null)
+		setilig(ilig_fptr, &ilig);
 
 	fclose(ipro_fptr);
 	fclose(ilig_fptr);
